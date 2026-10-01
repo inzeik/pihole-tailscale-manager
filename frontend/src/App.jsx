@@ -60,7 +60,7 @@ export default function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [s, d, q, h, t, i] = await Promise.all([
+        const results = await Promise.allSettled([
           getPiHoleStats(),
           getTailscaleDevices(),
           getLiveQueries(),
@@ -68,16 +68,23 @@ export default function App() {
           getTopBlocked(),
           getInfo(),
         ]);
-        setStats(s);
-        setDevices(d);
-        setQueries(q);
-        setHistory(h);
-        setTopBlocked(t);
-        setInfo(i);
-        setBlocking(s.status === 'enabled');
+
+        const [s, d, q, h, t, i] = results.map((r) =>
+          r.status === 'fulfilled' ? r.value : null
+        );
+
+        if (s) setStats(s);
+        if (d) setDevices(d);
+        if (q) setQueries(q);
+        if (h) setHistory(h);
+        if (t) setTopBlocked(t);
+        if (i) setInfo(i);
+        if (s) setBlocking(s.status === 'enabled');
+
         setReady(true);
       } catch (e) {
         console.error(e);
+        setReady(true);
       }
     };
     load();

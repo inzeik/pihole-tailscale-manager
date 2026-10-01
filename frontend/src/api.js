@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Use environment variable for production, fallback to localhost for development
 const API_BASE = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8000/api`;
 
 export const getPiHoleStats = async () => {
@@ -20,6 +19,11 @@ export const getLiveQueries = async () => {
 
 export const getHistory = async () => {
   const response = await axios.get(`${API_BASE}/history`);
+  return response.data;
+};
+
+export const getTopBlocked = async () => {
+  const response = await axios.get(`${API_BASE}/top-blocked`);
   return response.data;
 };
 

@@ -84,7 +84,6 @@ async def get_stats():
 
 @app.get("/api/queries/live")
 async def get_live_queries():
-    """Fetch real live logs from NextDNS."""
     if not API_KEY or not PROFILE_ID:
         return []
     try:
@@ -103,7 +102,7 @@ async def get_live_queries():
                 device = entry.get("device", {}) or {}
                 queries.append({
                     "time": ts[11:19] if len(ts) >= 19 else ts,
-                    "client": device.get("name") or device.get("model") or "unknown",
+                    "client": device.get("name") or device.get("model") or entry.get("clientIp") or "unknown",
                     "domain": entry.get("domain", ""),
                     "status": "BLOCKED" if entry.get("status") == "blocked" else "ALLOWED",
                 })
@@ -115,7 +114,6 @@ async def get_live_queries():
 
 @app.get("/api/tailscale/devices")
 async def get_devices():
-    """Real devices extracted from NextDNS logs."""
     if not API_KEY or not PROFILE_ID:
         return []
     try:
@@ -125,21 +123,18 @@ async def get_devices():
                 headers=HEADERS, timeout=10.0,
             )
             if res.status_code != 200:
-                print(f"NextDNS devices status {res.status_code}: {res.text}")
                 return []
             log_data = res.json().get("data", [])
-
-            # Aggregate unique devices
             devices_map = {}
             for entry in log_data:
                 device = entry.get("device", {}) or {}
-                dev_id = device.get("id") or device.get("name") or "unknown"
+                dev_id = device.get("id") or device.get("name") or entry.get("clientIp") or "unknown"
                 if dev_id not in devices_map:
                     devices_map[dev_id] = {
                         "id": str(len(devices_map) + 1),
-                        "name": device.get("name") or device.get("model") or "Unknown device",
+                        "name": device.get("name") or device.get("model") or entry.get("clientIp") or "Unknown device",
                         "hostname": device.get("model") or device.get("name") or "unknown",
-                        "ip": device.get("ip") or device.get("localIp") or "—",
+                        "ip": device.get("ip") or device.get("localIp") or entry.get("clientIp") or "—",
                         "os": device.get("model") or "Unknown",
                         "online": True,
                     }
@@ -166,6 +161,33 @@ async def get_history():
         {"time": k, "queries": v["queries"], "blocked": v["blocked"]}
         for k, v in sorted(buckets.items())
     ]
+
+
+@app.get("/api/top-blocked")
+async def get_top_blocked():
+    if not API_KEY or not PROFILE_ID:
+        return []
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                f"{NEXTDNS_API}/profiles/{PROFILE_ID}/logs",
+                headers=HEADERS, timeout=10.0,
+            )
+            if res.status_code != 200:
+                print(f"NextDNS top-blocked status {res.status_code}: {res.text}")
+                return []
+            log_data = res.json().get("data", [])
+            counts = {}
+            for entry in log_data:
+                if entry.get("status") == "blocked":
+                    domain = entry.get("domain", "")
+                    if domain:
+                        counts[domain] = counts.get(domain, 0) + 1
+            sorted_items = sorted(counts.items(), key=lambda x: -x[1])[:10]
+            return [{"domain": d, "count": c} for d, c in sorted_items]
+    except Exception as e:
+        print(f"NextDNS top-blocked exception: {e}")
+        return []
 
 
 @app.get("/api/info")
