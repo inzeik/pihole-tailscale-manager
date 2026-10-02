@@ -14,6 +14,7 @@ import {
 import AnimatedNumber from './components/AnimatedNumber';
 import QRModal from './components/QRModal';
 import HowItWorksModal from './components/HowItWorksModal';
+import SetupGuideModal from './components/SetupGuideModal';
 import './App.css';
 
 function ShieldIcon({ size = 24 }) {
@@ -45,6 +46,15 @@ function InfoIcon() {
   );
 }
 
+function SetupIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <path d="M9 9h6M9 13h6M9 17h3" />
+    </svg>
+  );
+}
+
 export default function App() {
   const [stats, setStats] = useState(null);
   const [devices, setDevices] = useState([]);
@@ -55,6 +65,7 @@ export default function App() {
   const [blocking, setBlocking] = useState(true);
   const [showQR, setShowQR] = useState(false);
   const [showHIW, setShowHIW] = useState(false);
+  const [showSetup, setShowSetup] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -129,6 +140,9 @@ export default function App() {
         </nav>
 
         <div className="top-actions">
+          <button className="icon-btn" onClick={() => setShowSetup(true)} title="Setup guide">
+            <SetupIcon />
+          </button>
           <button className="icon-btn" onClick={() => setShowQR(true)} title="Show QR code">
             <QRicon />
           </button>
@@ -156,7 +170,9 @@ export default function App() {
           <div className="hero-stat-value">
             <AnimatedNumber value={stats?.ads_blocked_today || 0} />
           </div>
-          <div className="hero-stat-label">Across {devices.length} devices</div>
+          <div className="hero-stat-label">
+            Across {devices.length} {devices.length === 1 ? 'device' : 'devices'}
+          </div>
         </div>
       </section>
 
@@ -174,14 +190,6 @@ export default function App() {
             <AnimatedNumber value={stats?.ads_blocked_today || 0} />
           </div>
           <div className="kpi-sub">Last 24 hours</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Block Ratio</div>
-          <div className="kpi-value accent-red">
-            {stats?.ads_percentage_today?.toFixed(2) || '0.00'}
-            <span className="kpi-suffix">%</span>
-          </div>
-          <div className="kpi-sub">Of all queries</div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Blocklist</div>
@@ -318,10 +326,24 @@ export default function App() {
       </div>
 
       <footer className="footer">
-        <span>AdGuard · Network Ad Blocker</span>
-        <span>NextDNS + FastAPI + React</span>
+        <div className="footer-left">
+          <span className="footer-brand">ADGUARD · Network Ad Blocker</span>
+          <span className="footer-stack">NextDNS + FastAPI + React</span>
+        </div>
+        <div className="footer-right">
+          <span className="footer-label">Built by</span>
+          <a href="mailto:inzeikofficial@gmail.com" className="footer-name">
+            Inzeik
+          </a>
+          <span className="footer-sep">·</span>
+          <span className="footer-label">BMIT</span>
+          <a href="mailto:bmit@bmssp.org" className="footer-name">
+            bmit@bmssp.org
+          </a>
+        </div>
       </footer>
 
+      <SetupGuideModal open={showSetup} onClose={() => setShowSetup(false)} />
       <QRModal open={showQR} onClose={() => setShowQR(false)} />
       <HowItWorksModal open={showHIW} onClose={() => setShowHIW(false)} info={info} />
     </div>

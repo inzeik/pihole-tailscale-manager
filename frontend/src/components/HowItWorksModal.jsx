@@ -7,25 +7,27 @@ export default function HowItWorksModal({ open, onClose, info }) {
         <button className="modal-close" onClick={onClose}>✕</button>
         <h2>How it works</h2>
         <p className="modal-sub">
-          Simulating a real Pi-hole + Tailscale deployment on a Raspberry Pi.
+          A cloud-deployed DNS filtering system with a real-time dashboard.
         </p>
 
         <div className="hiw-hero">
           <div className="hiw-hero-item">
-            <span className="hiw-label">Hardware</span>
-            <span className="hiw-value">{info.real_setup.hardware}</span>
+            <span className="hiw-label">Frontend</span>
+            <span className="hiw-value">{info.stack.frontend}</span>
           </div>
           <div className="hiw-hero-item">
-            <span className="hiw-label">DNS Filter</span>
-            <span className="hiw-value">{info.real_setup.dns_filter}</span>
+            <span className="hiw-label">Backend</span>
+            <span className="hiw-value">{info.stack.backend}</span>
           </div>
           <div className="hiw-hero-item">
-            <span className="hiw-label">Mesh VPN</span>
-            <span className="hiw-value">{info.real_setup.mesh_vpn}</span>
+            <span className="hiw-label">Filtering</span>
+            <span className="hiw-value">{info.stack.filtering}</span>
           </div>
           <div className="hiw-hero-item">
-            <span className="hiw-label">Total cost</span>
-            <span className="hiw-value">${info.real_setup.cost_usd}</span>
+            <span className="hiw-label">Hosting</span>
+            <span className="hiw-value">
+              {info.stack.frontend_host} + {info.stack.backend_host}
+            </span>
           </div>
         </div>
 
@@ -39,6 +41,34 @@ export default function HowItWorksModal({ open, onClose, info }) {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="hiw-footer">
+          <span className="hiw-label">Total cost</span>
+          <span className="hiw-value">{info.stack.cost} · No hardware required</span>
+        </div>
+
+        <div className="hiw-author">
+          <div className="hiw-author-row">
+            <span className="hiw-label">Built by</span>
+            <span className="hiw-value">{info.author.name}</span>
+          </div>
+          <div className="hiw-author-row">
+            <span className="hiw-label">Email</span>
+            <a href={`mailto:${info.author.email}`} className="hiw-value hiw-link">
+              {info.author.email}
+            </a>
+          </div>
+          <div className="hiw-author-row">
+            <span className="hiw-label">Institution</span>
+            <span className="hiw-value">{info.institution.name}</span>
+          </div>
+          <div className="hiw-author-row">
+            <span className="hiw-label">College Email</span>
+            <a href={`mailto:${info.institution.email}`} className="hiw-value hiw-link">
+              {info.institution.email}
+            </a>
+          </div>
         </div>
       </div>
     </div>
