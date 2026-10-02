@@ -57,13 +57,23 @@ async def fetch_json(client: httpx.AsyncClient, url: str) -> dict | None:
         return None
 
 
-@app.get("/")
+# ============================================
+# ROOT / HEALTH CHECK
+# Accepts GET (browser) + HEAD (UptimeRobot)
+# ============================================
+
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {
         "service": "AdGuard Dashboard API",
         "status": "ok",
         "configured": is_configured(),
     }
+
+
+@app.api_route("/healthz", methods=["GET", "HEAD"])
+async def healthz():
+    return {"status": "healthy"}
 
 
 @app.get("/api/stats", response_model=StatsResponse)
